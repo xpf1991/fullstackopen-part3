@@ -87,7 +87,6 @@ app.delete('/api/notes/:id', (request, response, next) => {
             response.status(204).end()
         })
         .catch(error => next(error))
-
     /*
     const id = Number(request.params.id)
     notes = notes.filter(note => note.id !== id)
@@ -111,12 +110,12 @@ app.put('/api/notes/:id', (request, response, next) => {
         important: body.important
     }
 
-    Note.findByIdAndUpdate(request.params.id, note, { new: true })
+    Note.findByIdAndUpdate(request.params.id, note, { new: true, runValidators: true, context: 'query' })
         .then(updateNote => response.json(updateNote))
         .catch(error => next(error))
 })
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
     const body = request.body
     if (!body.content) {
         return response.status(400).json({
@@ -132,9 +131,11 @@ app.post('/api/notes', (request, response) => {
     })
 
     console.log('save before')
-    note.save().then(savedNote => {
-        response.json(savedNote)
-    })
+    note.save()
+        .then(savedNote => {
+            response.json(savedNote)
+        })
+        .catch(error => next(error))
     console.log('save after')
 })
 
@@ -147,8 +148,10 @@ app.use(unknownEndpoint)
 const errorHandler = ((error, request, response, next) => {
     console.error(error.message)
 
-    if (error.name = 'CastError') {
+    if (error.name === 'CastError') {
         return response.status(404).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(404).json(error.message)
     }
 
     next(error)

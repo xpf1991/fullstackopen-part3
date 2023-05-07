@@ -1,7 +1,7 @@
-PUT http://localhost:3001/api/notes/645613df1f4a2745355cea10
+PUT http://localhost:3001/api/notes/645780b1cb6faf8f100d6394
 content-type: application/json
 
 {
-    "content": "do 5",
-    "important": false
+    "content": "do 6",
+    "important": true
 }
