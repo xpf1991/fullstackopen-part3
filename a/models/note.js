@@ -5,10 +5,10 @@ const url = process.env.MONGODB_URL
 console.log('connecting to ', url)
 
 mongoose.connect(url)
-    .then(result=>{
+    .then(result => {
         console.log('connected to mongoDB')
     })
-    .catch(error=>{
+    .catch(error => {
         console.log('error connecting to mongoDB', error.message)
     })
 
