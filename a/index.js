@@ -13,15 +13,15 @@ const requestLogger = (request, response, next) => {
     console.log('Body: ', request.body)
     console.log('---')
     /* 
-       目前看中间件是在下文app.post等运行前执行，
-       也即中间件函数在路由事件处理程序被调用前执行
-
-       注意：这里中间件无法输出response值，下述都是undefined,
-        console.log('Response:', response.PORT)
-        console.log('Response:', response.body)
-       因为response根本没有被定义
-       需要特别注意：中间件的执行顺序与它们通过app.use函数加载到 express 中的顺序相同
-    */
+         目前看中间件是在下文app.post等运行前执行，
+         也即中间件函数在路由事件处理程序被调用前执行
+  
+         注意：这里中间件无法输出response值，下述都是undefined,
+          console.log('Response:', response.PORT)
+          console.log('Response:', response.body)
+         因为response根本没有被定义
+         需要特别注意：中间件的执行顺序与它们通过app.use函数加载到 express 中的顺序相同
+      */
     next()
 }
 app.use(requestLogger)
@@ -83,7 +83,7 @@ app.get('/api/notes/:id', (request, response, next) => {
 
 app.delete('/api/notes/:id', (request, response, next) => {
     Note.findByIdAndDelete(request.params.id)
-        .then(result => {
+        .then(() => {
             response.status(204).end()
         })
         .catch(error => next(error))

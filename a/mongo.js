@@ -15,9 +15,9 @@ const url =
 mongoose.connect(url)
 
 const noteSchema = new mongoose.Schema({
-  content: String,
-  date: Date,
-  important: Boolean,
+    content: String,
+    date: Date,
+    important: Boolean,
 })
 
 const Note = mongoose.model('Note', noteSchema)
@@ -36,8 +36,8 @@ note.save().then(result => {
 */
 
 Note.find({ important: false }).then(result => {
-  result.forEach(note => {
-    console.log(note)
-  })
-  mongoose.connection.close()
+    result.forEach(note => {
+        console.log(note)
+    })
+    mongoose.connection.close()
 })
