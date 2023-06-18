@@ -1,13 +1,25 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
+const User = require('../models/user')
 
-notesRouter.get('/', (request, response) => {
-    Note.find({}).then(notes => {
-        response.json(notes)
-    })
+notesRouter.get('/', async (request, response) => {
+    const notes = await Note.find({}).populate('user', { username: 1, name: 1 })
+    response.json(notes)
 })
 
-notesRouter.get('/:id', (request, response, next) => {
+notesRouter.get('/:id', async (request, response, next) => {
+    try {
+        const note = await Note.findById(request.params.id)
+        if (note) {
+            response.json(note)
+        } else {
+            response.status(404).end
+        }
+    } catch (error) {
+        next(error)
+    }
+
+    /* old version
     Note.findById(request.params.id)
         .then(note => {
             if (note) {
@@ -17,14 +29,23 @@ notesRouter.get('/:id', (request, response, next) => {
             }
         })
         .catch(error => next(error))
+    */
 })
 
-notesRouter.delete('/:id', (request, response, next) => {
+notesRouter.delete('/:id', async (request, response, next) => {
+    try {
+        await Note.findByIdAndDelete(request.params.id)
+        response.status(204).end()
+    } catch (error) {
+        next(error)
+    }
+    /*
     Note.findByIdAndDelete(request.params.id)
         .then(() => {
             response.status(204).end()
         })
         .catch(error => next(error))
+    */
     /*
     const id = Number(request.params.id)
     notes = notes.filter(note => note.id !== id)
@@ -53,7 +74,7 @@ notesRouter.put('/:id', (request, response, next) => {
         .catch(error => next(error))
 })
 
-notesRouter.post('/', (request, response, next) => {
+notesRouter.post('/', async (request, response, next) => {
     const body = request.body
     if (!body.content) {
         return response.status(400).json({
@@ -61,20 +82,33 @@ notesRouter.post('/', (request, response, next) => {
         })
     }
 
+    const user = await User.findById(body.userId)
+    console.log('user.notes is:', user.notes)
+
     const note = new Note({
         //id: generateId(),
         date: new Date(),
         content: body.content,
-        important: body.important || false
+        important: body.important || false,
+        user: user._id
     })
 
-    console.log('save before')
+    try {
+        const savedNote = await note.save()
+        user.notes = user.notes.concat(savedNote._id)
+        await user.save()
+        response.status(201).json(savedNote)
+    } catch (exception) {
+        next(exception)
+    }
+    /* old version
     note.save()
         .then(savedNote => {
-            response.json(savedNote)
+            response.status(201).json(savedNote)
         })
         .catch(error => next(error))
-    console.log('save after')
+    */
+
 })
 
 module.exports = notesRouter
